@@ -53,11 +53,11 @@ def load_data():
     t_p : array-like
         Vector of times at which measurements of p were taken.
     p : array-like
-        Vector of p (units)
+        Vector of p (MPa)
     t_q : array-like
         Vector of times at which measurements of q were taken.
     q : array-like
-        Vector of q (units)
+        Vector of q (t/hr)
     """
     # Load kettle data
     t_p, p = np.genfromtxt('p_injection.csv', delimiter=',', skip_header=1).T
@@ -67,7 +67,7 @@ def load_data():
 
 
 # This function solves your ODE using Improved Euler
-def solve_ode(f, t0, t1, dt, xi, pars):
+def solve_ode(f, t0, t1, dt, pi, pars):
     """ Solve an ODE using the Improved Euler Method.
     Parameters:
     -----------
@@ -79,7 +79,7 @@ def solve_ode(f, t0, t1, dt, xi, pars):
         Final time of solution.
     dt : float
         Time step length.
-    xi : float
+    pi : float
         Initial value of solution. INITIAL PRESSURE?
     pars : array-like
         List of parameters passed to ODE function f.
@@ -110,17 +110,17 @@ def solve_ode(f, t0, t1, dt, xi, pars):
     n = int(tspan // dt)
 
     # initialise the independent and dependent variable solution vectors
-    x = [xi]
+    p = [pi]
     t = [t0]
 
     # perform Improved Euler to calculate the independent and dependent variable solutions
     for i in range(n):
-        f0 = f(t[i], x[i], q, *pars)
-        f1 = f(t[i] + dt, x[i] + dt * f0, q, *pars)
-        x.append(x[i] + dt * (f0 / 2 + f1 / 2))
+        f0 = f(t[i], p[i], q, *pars)
+        f1 = f(t[i] + dt, p[i] + dt * f0, q, *pars)
+        p.append(p[i] + dt * (f0 / 2 + f1 / 2))
         t.append(t[i] + dt)
 
-    return t, x
+    return t, p
 
 
 # This function defines your ODE as a numerical function suitable for calling 'curve_fit' in scipy.
