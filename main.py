@@ -1,4 +1,4 @@
-from ethan_stinky_model import *
+from ethan_stinky_model_attempt2 import *
 
 if __name__ == "__main__":
 
