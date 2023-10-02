@@ -6,6 +6,10 @@ from matplotlib import cm
 from scipy.optimize import curve_fit
 from sklearn.linear_model import BayesianRidge
 
+A_GUESS = 0.0009
+B_GUESS = 0.8
+C_GUESS = -6e-05
+
 # This function defines your ODE.
 def ode_model(t, p, q, dqdt, a, b, c, p0):
     """ Return the derivative dx/dt at time, t, for given parameters.
@@ -258,15 +262,18 @@ def plot_suitable():
     [t, p_exact] = [load_data()[0], load_data()[1]]
 
     # TYPE IN YOUR PARAMETER ESTIMATE FOR a AND b HERE
-    a = 1
-    pars = [0.0008703704260405302, 0.8080259027586483, -5.961481653772722e-05]
+    a = A_GUESS
+    b = B_GUESS
+    c = C_GUESS
+
+    pars = [a, b, c]
   
     # solve ODE with estimated parameters and plot
     p = x_curve_fitting(t, *pars)
     ax1.plot(t, p_exact, 'k.', label='Observation')
     ax1.plot(t, p, 'r-', label='Curve Fitting Model')
-    ax1.set_ylabel('Temp (C)')
-    ax1.set_xlabel('Time (sec)')
+    ax1.set_ylabel('Pressure (MPa)')
+    ax1.set_xlabel('Time (Days)')
     ax1.legend()
 
     # compute the model misfit and plot
@@ -274,8 +281,8 @@ def plot_suitable():
     for i in range(len(p)):
         misfit[i] = p_exact[i] - p[i]
     ax2.plot(t, misfit, 'x', label='misfit', color='r')
-    ax2.set_ylabel('Temp misfit (C)')
-    ax2.set_xlabel('Time (sec)')
+    ax2.set_ylabel('Pressure misfit (MPa)')
+    ax2.set_xlabel('Time (Days)')
     plt.axhline(y=0, color='k', linestyle='-')
     ax2.legend()
 
@@ -291,22 +298,29 @@ def plot_improve():
     [t, p_exact] = [load_data()[0], load_data()[1]]
 
     # TYPE IN YOUR PARAMETER GUESS FOR a AND b HERE AS A START FOR OPTIMISATION
-    a = 1
-    pars_guess = [a, a, a]
+    a = A_GUESS
+    b = B_GUESS
+    c = C_GUESS
+    
+    pars_guess = [a, b, c]
+
+    # Print original parameter guesses
+    print ("Guesses for a, b and c :")
+    print (pars_guess[0], pars_guess[1], pars_guess[2])
     
     # call to find out optimal parameters using guess as start
     pars, pars_cov = x_pars(pars_guess)
 
     # check new optimised parameters
-    print ("Improved a and b")
+    print ("Improved a, b and c:")
     print (pars[0], pars[1], pars[2])
 
     # solve ODE with new parameters and plot 
     p = x_curve_fitting(t, *pars)
     ax1.plot(t, p_exact, 'k.', label='Observation')
     ax1.plot(t, p, 'r-', label='Curve Fitting Model')
-    ax1.set_ylabel('Temp (C)')
-    ax1.set_xlabel('Time (sec)')
+    ax1.set_ylabel('Pressure (MPa)')
+    ax1.set_xlabel('Time (Days)')
     ax1.legend()
 
     # compute the model misfit and plot
@@ -314,8 +328,8 @@ def plot_improve():
     for i in range(len(p)):
         misfit[i] = p_exact[i] - p[i]
     ax2.plot(t, misfit, 'x', label='misfit', color='r')
-    ax2.set_ylabel('Temp misfit (C)')
-    ax2.set_xlabel('Time (sec)')
+    ax2.set_ylabel('Pressure misfit (MPa)')
+    ax2.set_xlabel('Time (Days)')
     plt.axhline(y=0, color='k', linestyle='-')
     ax2.legend()
 
@@ -342,9 +356,9 @@ def plot_benchmark():
     dt = 0.5
 
     # model values for benchmark analytic solution
-    a = 1
-    b = 1
-    c = 1
+    a = A_GUESS
+    b = B_GUESS
+    c = C_GUESS
 
     # set ambient value to zero for benchmark analytic solution
     p0 = 0.02
@@ -359,7 +373,7 @@ def plot_benchmark():
     # Solve ODE and plot
     t, p = solve_ode(ode_model, t0, t1, dt, pi, pars)
     plot[0].plot(t, p, "bx", label="Numerical Solution")
-    plot[0].set_ylabel("Temperature [C]")
+    plot[0].set_ylabel("Pressure [MPa]")
     plot[0].set_xlabel("t")
     plot[0].set_title("Benchmark")
 
