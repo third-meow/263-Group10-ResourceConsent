@@ -7,20 +7,22 @@ from scipy.optimize import curve_fit
 from sklearn.linear_model import BayesianRidge
 
 # This function defines your ODE.
-def ode_model(t, p, q, a, b, c, p0): # DONT KNOW IF NEED p0, or dqdt as input or can calculate in function
+def ode_model(t, p, q, a, b, c, p0):
     """ Return the derivative dx/dt at time, t, for given parameters.
         Parameters:
         -----------
         t : float
             Independent variable time.
-        x : float
-            Dependent variable (pressure or temperature)
+        p : float
+            Dependent variable (pressure)
         q : float
             mass injection/ejection rate.
         a : float
             mass injection strength parameter.
         b : float
             recharge strength parameter.
+        c : float
+
         x0 : float
             Ambient value of dependent variable.
         Returns:
@@ -33,10 +35,8 @@ def ode_model(t, p, q, a, b, c, p0): # DONT KNOW IF NEED p0, or dqdt as input or
     """
     # equation to return the derivative of dependent variable with respect to time
 
-    # Somehow calculate dqdt?
-    dqdt = 0
-
     # TYPE IN YOUR TEMPERATURE ODE HERE
+    dqdt = 0
     dpdt = a * q - b * (p - p0) + c * dqdt
 
 
@@ -50,20 +50,19 @@ def load_data():
     -----------
     Returns:
     ----------
-    t_p : array-like
-        Vector of times at which measurements of p were taken.
-    p : array-like
-        Vector of p (MPa)
     t_q : array-like
         Vector of times at which measurements of q were taken.
     q : array-like
-        Vector of q (t/hr)
+        Vector of q (units)
+    t_x : array-like
+        Vector of times at which measurements of x were taken.
+    x : array-like
+        Vector of x (units)
     """
     # Load kettle data
-    t_p, p = np.genfromtxt('p_injection.csv', delimiter=',', skip_header=1).T
-    t_q, q = np.genfromtxt('q_injection.csv', delimiter=',', skip_header=1).T
+    t, p, q, dpdt, dqdt = np.genfromtxt('injection_data_combined.csv', delimiter=',', skip_header=1).T
 
-    return t_p, p, t_q, q
+    return t, p, q, dqdt
 
 
 # This function solves your ODE using Improved Euler
@@ -79,8 +78,8 @@ def solve_ode(f, t0, t1, dt, pi, pars):
         Final time of solution.
     dt : float
         Time step length.
-    pi : float
-        Initial value of solution. INITIAL PRESSURE?
+    xi : float
+        Initial value of solution.
     pars : array-like
         List of parameters passed to ODE function f.
     Returns:
@@ -99,7 +98,7 @@ def solve_ode(f, t0, t1, dt, pi, pars):
     """
 
     # set an arbitrary initial value of q for benchmark solution
-    q = 20.0
+    q = 20 # CHOSE 20
 
     if pars is None:
         pars = []
@@ -124,7 +123,7 @@ def solve_ode(f, t0, t1, dt, pi, pars):
 
 
 # This function defines your ODE as a numerical function suitable for calling 'curve_fit' in scipy.
-def p_curve_fitting(t, a, b, c):
+def x_curve_fitting(t, a, b, c):
     """ Function designed to be used with scipy.optimize.curve_fit which solves the ODE using the Improved Euler Method.
         Parameters:
         -----------
@@ -135,7 +134,7 @@ def p_curve_fitting(t, a, b, c):
         b : float
             recharge strength parameter.
         c : float
-            leakage parameter.
+
         Returns:
         --------
         x : array-like
@@ -145,7 +144,7 @@ def p_curve_fitting(t, a, b, c):
     pars = [a, b, c]
 
     # ambient value of dependent variable
-    x0 = 0.02
+    p0 = 0.02
 
     # time vector information
     n = len(t)
@@ -154,19 +153,19 @@ def p_curve_fitting(t, a, b, c):
     # read in time and dependent variable information
     [t, p_exact] = [load_data()[0], load_data()[1]]
 
-    # initialise x
+    # initialise p
     p = [p_exact[0]]
 
     # read in q data
-    [t_q, q] = [load_data()[2], load_data()[3]]
+    [t_q, q] = [load_data()[0], load_data()[2]]
 
     # using interpolation to find the injection rate at each point in time
     q = np.interp(t, t_q, q)
 
     # using the improved euler method to solve the ODE
     for i in range(n - 1):
-        f0 = ode_model(t[i], p[i], q[i], *pars, x0)
-        f1 = ode_model(t[i] + dt, p[i] + dt * f0, q[i], *pars, x0)
+        f0 = ode_model(t[i], p[i], q[i], *pars, p0)
+        f1 = ode_model(t[i] + dt, p[i] + dt * f0, q[i], *pars, p0)
         p.append(p[i] + dt * (f0 / 2 + f1 / 2))
 
     return p
@@ -185,11 +184,11 @@ def x_pars(pars_guess):
            Array consisting of a: mass injection strength parameter, b: recharge strength parameter
     """
     # read in time and dependent variable data
-    [t_exact, p_exact] = [load_data()[0], load_data()[1]]
+    [t_exact, x_exact] = [load_data()[0], load_data()[1]]
 
     # finding model constants in the formulation of the ODE using curve fitting
     # optimised parameters (pars) and covariance (pars_cov) between parameters
-    pars,pars_cov = curve_fit(p_curve_fitting, t_exact, p_exact, pars_guess)
+    pars,pars_cov = curve_fit(x_curve_fitting, t_exact, x_exact, pars_guess)
  
     return pars, pars_cov
 
@@ -207,16 +206,16 @@ def solve_ode_prediction(f, t0, t1, dt, pi, q, a, b, c, p0):
         Final time of solution.
     dt : float
         Time step length.
-    pi : float
+    xi : float
         Initial value of solution.
     a : float
         mass injection strength parameter.
     b : float
         recharge strength parameter.
     c : float
-        leakage parameter.
-    p0 : float
-        Ambient value of solution. 0.02 MPa
+
+    x0 : float
+        Ambient value of solution.
     Returns:
     --------
     t : array-like
@@ -243,7 +242,7 @@ def solve_ode_prediction(f, t0, t1, dt, pi, q, a, b, c, p0):
     for i in range(n):
         f0 = f(t[i], p[i], q, a, b, c, p0)
         f1 = f(t[i] + dt, p[i] + dt * f0, q, a, b, c, p0)
-        p.append(x[i] + dt * (f0 / 2 + f1 / 2))
+        p.append(p[i] + dt * (f0 / 2 + f1 / 2))
         t.append(t[i] + dt)
 
     return t, p
@@ -253,19 +252,19 @@ def solve_ode_prediction(f, t0, t1, dt, pi, q, a, b, c, p0):
 def plot_suitable():
     fig, (ax1, ax2) = plt.subplots(2, 1)
 
-    # read in time and pressure data
-    [t, p_exact] = [ load_data()[0], load_data()[1] ]
+    # read in time and temperature data
+    [t, p_exact] = [load_data()[0], load_data()[1]]
 
-    # TYPE IN YOUR PARAMETER ESTIMATE FOR a AND b AND c HERE
+    # TYPE IN YOUR PARAMETER ESTIMATE FOR a AND b HERE
     a = 1
     pars = [a, a, a]
   
     # solve ODE with estimated parameters and plot
-    p = p_curve_fitting(t, *pars)
+    p = x_curve_fitting(t, *pars)
     ax1.plot(t, p_exact, 'k.', label='Observation')
     ax1.plot(t, p, 'r-', label='Curve Fitting Model')
-    ax1.set_ylabel('Pressure (MPa)')
-    ax1.set_xlabel('Time (Days)')
+    ax1.set_ylabel('Temp (C)')
+    ax1.set_xlabel('Time (sec)')
     ax1.legend()
 
     # compute the model misfit and plot
@@ -273,8 +272,8 @@ def plot_suitable():
     for i in range(len(p)):
         misfit[i] = p_exact[i] - p[i]
     ax2.plot(t, misfit, 'x', label='misfit', color='r')
-    ax2.set_ylabel('Pres misfit (MPa)')
-    ax2.set_xlabel('Time (Days)')
+    ax2.set_ylabel('Temp misfit (C)')
+    ax2.set_xlabel('Time (sec)')
     plt.axhline(y=0, color='k', linestyle='-')
     ax2.legend()
 
@@ -287,7 +286,7 @@ def plot_improve():
     fig, (ax1, ax2) = plt.subplots(2, 1)
 
     # read in time and temperature data
-    [t, x_exact] = [load_data()[0], load_data()[1]]
+    [t, p_exact] = [load_data()[0], load_data()[1]]
 
     # TYPE IN YOUR PARAMETER GUESS FOR a AND b HERE AS A START FOR OPTIMISATION
     a = 1
@@ -298,23 +297,23 @@ def plot_improve():
 
     # check new optimised parameters
     print ("Improved a and b")
-    print (pars[0], pars[1])
+    print (pars[0], pars[1], pars[2])
 
     # solve ODE with new parameters and plot 
-    x = p_curve_fitting(t, *pars)
-    ax1.plot(t, x_exact, 'k.', label='Observation')
-    ax1.plot(t, x, 'r-', label='Curve Fitting Model')
-    ax1.set_ylabel('Pressure (Pa)')
-    ax1.set_xlabel('Time (Days)')
+    p = x_curve_fitting(t, *pars)
+    ax1.plot(t, p_exact, 'k.', label='Observation')
+    ax1.plot(t, p, 'r-', label='Curve Fitting Model')
+    ax1.set_ylabel('Temp (C)')
+    ax1.set_xlabel('Time (sec)')
     ax1.legend()
 
     # compute the model misfit and plot
-    misfit = x
-    for i in range(len(x)):
-        misfit[i] = x_exact[i] - x[i]
+    misfit = p
+    for i in range(len(p)):
+        misfit[i] = p_exact[i] - p[i]
     ax2.plot(t, misfit, 'x', label='misfit', color='r')
-    ax2.set_ylabel('Pres misfit (Pa)')
-    ax2.set_xlabel('Time (Days)')
+    ax2.set_ylabel('Temp misfit (C)')
+    ax2.set_xlabel('Time (sec)')
     plt.axhline(y=0, color='k', linestyle='-')
     ax2.legend()
 
@@ -356,9 +355,9 @@ def plot_benchmark():
     fig, plot = plt.subplots(nrows=1, ncols=3, figsize=(13, 5))
 
     # Solve ODE and plot
-    t, x = solve_ode(ode_model, t0, t1, dt, pi, pars)
-    plot[0].plot(t, x, "bx", label="Numerical Solution")
-    plot[0].set_ylabel("Pressure [MPa]")
+    t, p = solve_ode(ode_model, t0, t1, dt, pi, pars)
+    plot[0].plot(t, p, "bx", label="Numerical Solution")
+    plot[0].set_ylabel("Temperature [C]")
     plot[0].set_xlabel("t")
     plot[0].set_title("Benchmark")
 
@@ -366,21 +365,21 @@ def plot_benchmark():
     t = np.array(t)
 
 #   TYPE IN YOUR ANALYTIC SOLUTION HERE
-    a = 1; b = 1; q0 = 20;
-    x_analytical = ((a * q0)/b ) * (1 - np.exp(-b * t)) + p0
+    q0 = 20
+    p_analytical = ((a * q0)/b ) * (1 - np.exp(-b * t)) + p0
 
-    plot[0].plot(t, x_analytical, "r-", label="Analytical Solution")
+    plot[0].plot(t, p_analytical, "r-", label="Analytical Solution")
     plot[0].legend(loc=1)
 
     # Plot error
-    x_error = []
-    for i in range(1, len(x)):
-        if (x[i] - x_analytical[i]) == 0:
-            x_error.append(0)
+    p_error = []
+    for i in range(1, len(p)):
+        if (p[i] - p_analytical[i]) == 0:
+            p_error.append(0)
             print("check line Error Analysis Plot section")
         else:
-            x_error.append((np.abs(x[i] - x_analytical[i]) / np.abs(x_analytical[i])))
-    plot[1].plot(t[1:], x_error, "k*")
+            p_error.append((np.abs(p[i] - p_analytical[i]) / np.abs(p_analytical[i])))
+    plot[1].plot(t[1:], p_error, "k*")
     plot[1].set_ylabel("Relative Error Against Benchmark")
     plot[1].set_xlabel("t")
     plot[1].set_title("Error Analysis")
@@ -389,8 +388,8 @@ def plot_benchmark():
     # Timestep convergence plot
     time_step = np.flip(np.linspace(1/5, 1, 13))
     for i in time_step:
-        t, x = solve_ode(ode_model, t0, t1, i, p0, pars)
-        plot[2].plot(1 / i, x[-1], "kx")
+        t, p = solve_ode(ode_model, t0, t1, i, p0, pars)
+        plot[2].plot(1 / i, p[-1], "kx")
 
     plot[2].set_ylabel(f"Temp(t = {10})")
     plot[2].set_xlabel("1/\u0394t")
