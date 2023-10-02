@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 from sklearn.linear_model import BayesianRidge
 
 # This function defines your ODE.
-def ode_model(t, p, q, a, b, c, p0):
+def ode_model(t, p, q, dqdt, a, b, c, p0):
     """ Return the derivative dx/dt at time, t, for given parameters.
         Parameters:
         -----------
@@ -36,7 +36,7 @@ def ode_model(t, p, q, a, b, c, p0):
     # equation to return the derivative of dependent variable with respect to time
 
     # TYPE IN YOUR TEMPERATURE ODE HERE
-    dqdt = 0
+    
     dpdt = a * q - b * (p - p0) + c * dqdt
 
 
@@ -45,7 +45,8 @@ def ode_model(t, p, q, a, b, c, p0):
 
 # This function loads in your data.
 def load_data():
-    """ Load data throughout the time period.
+    """
+    Load data throughout the time period.
     Parameters:
     -----------
     Returns:
@@ -99,6 +100,7 @@ def solve_ode(f, t0, t1, dt, pi, pars):
 
     # set an arbitrary initial value of q for benchmark solution
     q = 20 # CHOSE 20
+    dqdt = 0
 
     if pars is None:
         pars = []
@@ -114,8 +116,8 @@ def solve_ode(f, t0, t1, dt, pi, pars):
 
     # perform Improved Euler to calculate the independent and dependent variable solutions
     for i in range(n):
-        f0 = f(t[i], p[i], q, *pars)
-        f1 = f(t[i] + dt, p[i] + dt * f0, q, *pars)
+        f0 = f(t[i], p[i], q, dqdt, *pars)
+        f1 = f(t[i] + dt, p[i] + dt * f0, q, dqdt, *pars)
         p.append(p[i] + dt * (f0 / 2 + f1 / 2))
         t.append(t[i] + dt)
 
@@ -157,15 +159,15 @@ def x_curve_fitting(t, a, b, c):
     p = [p_exact[0]]
 
     # read in q data
-    [t_q, q] = [load_data()[0], load_data()[2]]
+    [t_q, q, dqdt] = [load_data()[0], load_data()[2], load_data()[3]]
 
     # using interpolation to find the injection rate at each point in time
     q = np.interp(t, t_q, q)
 
     # using the improved euler method to solve the ODE
     for i in range(n - 1):
-        f0 = ode_model(t[i], p[i], q[i], *pars, p0)
-        f1 = ode_model(t[i] + dt, p[i] + dt * f0, q[i], *pars, p0)
+        f0 = ode_model(t[i], p[i], q[i], dqdt[i], *pars, p0)
+        f1 = ode_model(t[i] + dt, p[i] + dt * f0, q[i], dqdt[i], *pars, p0)
         p.append(p[i] + dt * (f0 / 2 + f1 / 2))
 
     return p
