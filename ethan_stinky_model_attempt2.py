@@ -259,7 +259,7 @@ def plot_suitable():
 
     # TYPE IN YOUR PARAMETER ESTIMATE FOR a AND b HERE
     a = 1
-    pars = [a, a, a]
+    pars = [0.0008703704260405302, 0.8080259027586483, -5.961481653772722e-05]
   
     # solve ODE with estimated parameters and plot
     p = x_curve_fitting(t, *pars)
