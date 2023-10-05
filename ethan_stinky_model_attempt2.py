@@ -17,11 +17,11 @@ porosity = 0.0000009999999999
 viscosity = 89000
 density = 997
 # k is permeability
-k = 1.257(10**-6)
+k = 1.257*(10**-6)
 area = g/(0.0008703704260405302*porosity)      
 a = g/(area*porosity)
-length = (0.8080259027586483/0.0008703704260405302)(viscosity/(k*density*area))
-b = a(k*density*area)/(viscosity*length)
+length = (0.8080259027586483/0.0008703704260405302)*(viscosity/(k*density*area))
+b = a*(k*density*area)/(viscosity*length)
 c = 1 # -5.961481653772722e-05
 
 A_GUESS = a; B_GUESS = b; C_GUESS = c;
