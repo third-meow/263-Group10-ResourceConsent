@@ -12,20 +12,23 @@ from sklearn.linear_model import BayesianRidge
 # C_GUESS = -6e-05
 
 # Finding estimates using physics:
-g = 9.81 # m/s^2
-porosity = 0.0000009999999999
-viscosity = 89000
-density = 997
+g = 9.81  # m/s^2
+porosity = 0.0175  # of concrete? percentage %1.75
+viscosity = 0.89  # 0.89MPa/s
+density = 997  # of water in kg/m^3
 # k is permeability
-k = 1.257*(10**-6)
-area = g/(0.0008703704260405302*porosity)      
-a = g/(area*porosity)
-length = (0.8080259027586483/0.0008703704260405302)*(viscosity/(k*density*area))
-b = a*(k*density*area)/(viscosity*length)
-c = 1 # -5.961481653772722e-05
+k = 1.257 * (10 ** -6)  # of air? H.m^-1
 
-A_GUESS = a; B_GUESS = b; C_GUESS = c;
+area = g / (0.0008703704260405302 * porosity)
+a = g / (area * porosity)
 
+length = (0.8080259027586483 / 0.0008703704260405302) * (viscosity / (k * density * area))
+b = a * (k * density * area) / (viscosity * length)
+c = -6
+
+A_GUESS = a;
+B_GUESS = b;
+C_GUESS = c;
 
 # This function defines your ODE.
 def ode_model(t, p, q, dqdt, a, b, c, p0):
