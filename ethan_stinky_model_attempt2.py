@@ -307,6 +307,7 @@ def plot_suitable():
     ax2.legend()
 
     plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+    plt.savefig("Estimated Parameter Model Plot.png")
     plt.show()
 
 
@@ -354,6 +355,7 @@ def plot_improve():
     ax2.legend()
 
     plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+    plt.savefig("Curve Fit Parameters Model Plot.png")
     plt.show()
 
 
@@ -427,13 +429,14 @@ def plot_benchmark():
         t, p = solve_ode(ode_model, t0, t1, i, p0, pars)
         plot[2].plot(1 / i, p[-1], "kx")
 
-    plot[2].set_ylabel(f"Temp(t = {10})")
+    plot[2].set_ylabel(f"Pressure(t = {10})")
     plot[2].set_xlabel("1/\u0394t")
     plot[2].set_title("Timestep Convergence")
 
     # plot spacings
     fig.tight_layout()
     plt.subplots_adjust(wspace=0.3)
+    plt.savefig("Benchmark Plots.png")
     plt.show()
 
 
