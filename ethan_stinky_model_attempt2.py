@@ -307,7 +307,7 @@ def plot_suitable():
     misfit = p
     for i in range(len(p)):
         misfit[i] = p_exact[i] - p[i]
-    print(sum(misfit))
+    print(f"Misfit is: {sum(abs(i) for i in misfit)}")
     ax2.plot(t, misfit, 'x', label='misfit', color='r')
     ax2.set_ylabel('Pressure misfit (MPa)')
     ax2.set_xlabel('Time (Days)')
@@ -356,7 +356,7 @@ def plot_improve():
     misfit = p
     for i in range(len(p)):
         misfit[i] = p_exact[i] - p[i]
-    print(sum(misfit))
+    print(f"Misfit is: {sum(abs(i) for i in misfit)}")
     ax2.plot(t, misfit, 'x', label='misfit', color='r')
     ax2.set_ylabel('Pressure misfit (MPa)')
     ax2.set_xlabel('Time (Days)')
