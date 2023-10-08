@@ -441,7 +441,7 @@ def plot_benchmark():
 
 # This function plots the ode against data with a scaled parameter
 def plot_scaled_ode():
-    fig, (ax1) = plt.subplots(1, 1)
+    fig, (ax1, ax2) = plt.subplots(2, 1)
 
     # read in time and temperature data
     [t, p_exact] = [load_data()[0], load_data()[1]]
@@ -457,10 +457,22 @@ def plot_scaled_ode():
     # solve ODE with estimated parameters and plot
     p = x_curve_fitting(t, *pars)
     ax1.plot(t, p_exact, 'k.', label='Observation')
-    ax1.plot(t, p, 'r-', label='Curve Fitting Model')
+    ax1.plot(t, p, 'r-', label='Scaled Parameter Model')
     ax1.set_ylabel('Pressure (MPa)')
     ax1.set_xlabel('Time (Days)')
+    ax1.set_title('Scaled q = 0, no injection')
     ax1.legend()
+
+    # Scale b parameter by factor of 5, expecting increased discharge and lower pressures
+    pars = [a, b * 5, c]
+    p = x_curve_fitting(t, *pars)
+
+    ax2.plot(t, p_exact, 'k.', label='Observation')
+    ax2.plot(t, p, 'r-', label='Scaled Parameter Model')
+    ax2.set_ylabel('Pressure (MPa)')
+    ax2.set_xlabel('Time (Days)')
+    ax2.set_title('Scaled b by factor of 5')
+    ax2.legend()
 
     plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     plt.savefig("Scaled Parameter Model Plot.png")
