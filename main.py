@@ -13,3 +13,7 @@ if __name__ == "__main__":
 
     # # ODE model with improved parameter values from curve_fit
     plot_improve()
+
+    # Plot showing that with q = 0, there is very little pressure variation
+    # as expected
+    plot_scaled_ode()

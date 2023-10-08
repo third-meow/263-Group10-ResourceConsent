@@ -439,4 +439,29 @@ def plot_benchmark():
     plt.savefig("Benchmark Plots.png")
     plt.show()
 
+# This function plots the ode against data with a scaled parameter
+def plot_scaled_ode():
+    fig, (ax1) = plt.subplots(1, 1)
 
+    # read in time and temperature data
+    [t, p_exact] = [load_data()[0], load_data()[1]]
+
+    # TYPE IN YOUR PARAMETER ESTIMATE FOR a AND b HERE
+    a = A_GUESS
+    b = B_GUESS
+    c = C_GUESS
+
+    # Set a parameter to 0 so that q term = 0, essentially scaling q to 0
+    pars = [a * 0, b, c]
+  
+    # solve ODE with estimated parameters and plot
+    p = x_curve_fitting(t, *pars)
+    ax1.plot(t, p_exact, 'k.', label='Observation')
+    ax1.plot(t, p, 'r-', label='Curve Fitting Model')
+    ax1.set_ylabel('Pressure (MPa)')
+    ax1.set_xlabel('Time (Days)')
+    ax1.legend()
+
+    plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+    plt.savefig("Scaled Parameter Model Plot.png")
+    plt.show()
