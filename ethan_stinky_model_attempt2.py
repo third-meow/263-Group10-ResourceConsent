@@ -22,7 +22,7 @@ k = 0.1 # 1.257 * (10 ** -6)  # of air? H.m^-1
 area = 40000 # g / (0.0008703704260405302 * porosity)
 a = 9.81 * 10 ** (-4) #g / (area * porosity)
 
-length = (0.8080259027586483 / 0.0008703704260405302) * (viscosity / (k * density * area))
+length = area / (9*10**(-3)) #0.8080259027586483 / 0.0008703704260405302) * (viscosity / (k * density * area))
 b = 0.586 # a * (k * density * area) / (viscosity * length)
 c = 0
 
