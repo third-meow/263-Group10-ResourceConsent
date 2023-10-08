@@ -14,16 +14,16 @@ from sklearn.linear_model import BayesianRidge
 # Finding estimates using physics:
 g = 9.81  # m/s^2
 porosity = 0.0175  # of concrete? percentage %1.75
-viscosity = 0.89  # 0.89MPa/s
+viscosity = 1.0016 * 10 ** (-3)  # 0.89MPa/s
 density = 997  # of water in kg/m^3
 # k is permeability
-k = 1.257 * (10 ** -6)  # of air? H.m^-1
+k = 0.1 # 1.257 * (10 ** -6)  # of air? H.m^-1
 
-area = g / (0.0008703704260405302 * porosity)
-a = g / (area * porosity)
+area = 40000 # g / (0.0008703704260405302 * porosity)
+a = 9.81 * 10 ** (-4) #g / (area * porosity)
 
 length = (0.8080259027586483 / 0.0008703704260405302) * (viscosity / (k * density * area))
-b = a * (k * density * area) / (viscosity * length)
+b = 0.586 # a * (k * density * area) / (viscosity * length)
 c = -6*(10**-5)
 
 A_GUESS = a;
