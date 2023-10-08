@@ -24,7 +24,7 @@ a = 9.81 * 10 ** (-4) #g / (area * porosity)
 
 length = (0.8080259027586483 / 0.0008703704260405302) * (viscosity / (k * density * area))
 b = 0.586 # a * (k * density * area) / (viscosity * length)
-c = -6*(10**-5)
+c = 0
 
 A_GUESS = a;
 B_GUESS = b;
