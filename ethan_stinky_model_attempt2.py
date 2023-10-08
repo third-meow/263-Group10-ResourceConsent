@@ -13,22 +13,29 @@ from sklearn.linear_model import BayesianRidge
 
 # Finding estimates using physics:
 g = 9.81  # m/s^2
-porosity = 0.0175  # of concrete? percentage %1.75
+porosity = 0.02  # of concrete? percentage %1.75
 viscosity = 1.0016 * 10 ** (-3)  # 0.89MPa/s
 density = 997  # of water in kg/m^3
 # k is permeability
 k = 0.1 # 1.257 * (10 ** -6)  # of air? H.m^-1
 
-area = 40000 # g / (0.0008703704260405302 * porosity)
-a = 9.81 * 10 ** (-4) #g / (area * porosity)
+area = 5*10**5 # g / (0.0008703704260405302 * porosity)
+length = 2*10**6 #0.8080259027586483 / 0.0008703704260405302) * (viscosity / (k * density * area))
 
-length = area / (9*10**(-3)) #0.8080259027586483 / 0.0008703704260405302) * (viscosity / (k * density * area))
+# Sam's calculated values (used)
+a = 9.81 * 10 ** (-4) #g / (area * porosity)
 b = 0.586 # a * (k * density * area) / (viscosity * length)
 c = 0
+
+# Ethan's calculated values (unused)
+a_param = g / (area * porosity)
+b_param = a_param * k * density * area / (porosity * length)
 
 A_GUESS = a;
 B_GUESS = b;
 C_GUESS = c;
+
+print(f"a value is: {a_param}\nb value is: {b_param}")
 
 # This function defines your ODE.
 def ode_model(t, p, q, dqdt, a, b, c, p0):
@@ -300,6 +307,7 @@ def plot_suitable():
     misfit = p
     for i in range(len(p)):
         misfit[i] = p_exact[i] - p[i]
+    print(sum(misfit))
     ax2.plot(t, misfit, 'x', label='misfit', color='r')
     ax2.set_ylabel('Pressure misfit (MPa)')
     ax2.set_xlabel('Time (Days)')
@@ -348,6 +356,7 @@ def plot_improve():
     misfit = p
     for i in range(len(p)):
         misfit[i] = p_exact[i] - p[i]
+    print(sum(misfit))
     ax2.plot(t, misfit, 'x', label='misfit', color='r')
     ax2.set_ylabel('Pressure misfit (MPa)')
     ax2.set_xlabel('Time (Days)')
