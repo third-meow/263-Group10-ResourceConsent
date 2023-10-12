@@ -7,9 +7,9 @@ from scipy.optimize import curve_fit
 from sklearn.linear_model import BayesianRidge
 
 # Estimates found using plot_improve (cheating)
-# A_GUESS = 0.0009
-# B_GUESS = 0.8
-# C_GUESS = -6e-05
+A_IMPROVED = 0.0009
+B_IMPROVED = 0.8
+C_IMPROVED = -6e-05
 
 # Finding estimates using physics:
 g = 9.81  # m/s^2
@@ -503,7 +503,7 @@ def plot_x_forecast():
     [t, p_exact, dqdt] = [load_data()[0], load_data()[1], load_data()[3]]
   
     # GUESS PARAMETERS HERE
-    pars_guess = [A_GUESS,B_GUESS,C_GUESS]
+    pars_guess = [A_IMPROVED,B_IMPROVED,C_IMPROVED]
 
     # Optimise parameters for model fit
     pars, pars_cov = x_pars(pars_guess)
@@ -534,17 +534,17 @@ def plot_x_forecast():
     # Solve ODE prediction for scenario 1
     q1=250 # heat up again
     x1 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q1, dqdt, a, b, c, p0)[1]
-    ax1.plot(t1, x1, 'purple', label='Prediction when q = 300')
+    ax1.plot(t1, x1, 'purple', label='Prediction when q = 250')
 
     # Solve ODE prediction for scenario 2
     q2=125 # keep q the same at zero
     x2 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q2, dqdt, a, b, c, p0)[1]
-    ax1.plot(t1, x2, 'green', label='Prediction when q = 0')
+    ax1.plot(t1, x2, 'green', label='Prediction when q = 125')
 
     # Solve ODE prediction for scenario 3
     q3=0 # extract at faster rate
     x3 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q3, dqdt, a, b, c, p0)[1]
-    ax1.plot(t1, x3, 'blue', label='Prediction when q = -300')
+    ax1.plot(t1, x3, 'blue', label='Prediction when q = 0')
 
     # Axis information
     ax1.set_title('Temp Forecast')
@@ -564,7 +564,7 @@ def plot_x_uncertainty():
     [t, p_exact] = [load_data()[2], load_data()[3]]
 
     # GUESS PARAMETERS HERE
-    pars_guess = [A_GUESS,B_GUESS,C_GUESS]
+    pars_guess = [A_IMPROVED,B_IMPROVED,C_IMPROVED]
 
     # Optimise parameters for model fit
     pars, pars_cov = x_pars(pars_guess)
