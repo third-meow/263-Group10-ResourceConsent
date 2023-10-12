@@ -537,14 +537,18 @@ def plot_x_forecast():
     ax1.plot(t1, x1, 'purple', label='Prediction when q = 250')
 
     # Solve ODE prediction for scenario 2
-    q2=150 # keep q the same at zero
+    q2=200.72853466 # keep q the same at zero
     x2 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q2, dqdt, a, b, c, p0)[1]
-    ax1.plot(t1, x2, 'green', label='Prediction when q = 150')
+    ax1.plot(t1, x2, 'green', label='Prediction when q = 200.72853466')
 
     # Solve ODE prediction for scenario 3
-    q3=0 # extract at faster rate
+    q3=163.1947 # extract at faster rate
     x3 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q3, dqdt, a, b, c, p0)[1]
-    ax1.plot(t1, x3, 'blue', label='Prediction when q = 0')
+    ax1.plot(t1, x3, 'blue', label='Prediction when q = 163.1947')
+
+    q4 = 0  # extract at faster rate
+    x4 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q4, dqdt, a, b, c, p0)[1]
+    ax1.plot(t1, x4, 'pink', label='Prediction when q = 0')
 
     # Axis information
     ax1.set_title('Temp Forecast')
@@ -595,17 +599,22 @@ def plot_x_uncertainty():
     # Solve ODE prediction for scenario 1
     q1=250 # heat up again
     x1 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q1, dqdt, a, b, c, p0)[1]
-    ax1.plot(t1, x1, 'purple')
+    ax1.plot(t1, x1, 'red')
 
     # Solve ODE prediction for scenario 2
-    q2=150 # keep q the same at zero
+    q2=200.72853466 # keep q the same at zero
     x2 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q2, dqdt, a, b, c, p0)[1]
-    ax1.plot(t1, x2, 'green')
+    ax1.plot(t1, x2, 'red')
 
     # Solve ODE prediction for scenario 3
-    q3=0 # extract at faster rate
+    q3 = 163.1947 # extract at faster rate
     x3 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q3, dqdt, a, b, c, p0)[1]
-    ax1.plot(t1, x3, 'blue')
+    ax1.plot(t1, x3, 'red')
+
+    # Solve ODE prediction for scenario 4
+    q4 = 0  # extract at faster rate
+    x4 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q4, dqdt, a, b, c, p0)[1]
+    ax1.plot(t1, x4, 'red')
 
     # Estimate the variability of parameter b
     # We are assuming that parameter b has the biggest source of error in the system (you could choose another parameter if you like)
@@ -633,14 +642,18 @@ def plot_x_uncertainty():
         ax1.plot(t1, x1, 'purple', alpha=0.1, lw=0.5)
 
         # Solve ODE prediction for scenario 2 with uncertainty	
-        q2=125 # keep q the same at zero
+        q2=200.72853466 # keep q the same at zero
         x2 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q2, dqdt, a, samples[i], c, p0)[1]
         ax1.plot(t1, x2, 'green', alpha=0.1, lw=0.5)
 
         # Solve ODE prediction for scenario 3 with uncertainty
-        q3=0 # extract at faster rate
+        q3=163.1947 # extract at faster rate
         x3 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q3, dqdt, a, samples[i], c, p0)[1]
         ax1.plot(t1, x3, 'blue', alpha=0.1, lw=0.5)
+
+        q4 = 0 # extract at faster rate
+        x4 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q4, dqdt, a, samples[i], c, p0)[1]
+        ax1.plot(t1, x4, 'pink', alpha=0.1, lw=0.5)
 
     ax1.set_title('Pressure Uncertainty Forecast')
     ax1.set_ylabel('Pressure (MPa)')
