@@ -537,9 +537,9 @@ def plot_x_forecast():
     ax1.plot(t1, x1, 'purple', label='Prediction when q = 250')
 
     # Solve ODE prediction for scenario 2
-    q2=125 # keep q the same at zero
+    q2=150 # keep q the same at zero
     x2 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q2, dqdt, a, b, c, p0)[1]
-    ax1.plot(t1, x2, 'green', label='Prediction when q = 125')
+    ax1.plot(t1, x2, 'green', label='Prediction when q = 150')
 
     # Solve ODE prediction for scenario 3
     q3=0 # extract at faster rate
@@ -561,7 +561,7 @@ def plot_x_uncertainty():
     """
 
     # read in time and dependent variable data
-    [t, p_exact] = [load_data()[2], load_data()[3]]
+    [t, p_exact] = [load_data()[0], load_data()[1]]
 
     # GUESS PARAMETERS HERE
     pars_guess = [A_IMPROVED,B_IMPROVED,C_IMPROVED]
@@ -598,7 +598,7 @@ def plot_x_uncertainty():
     ax1.plot(t1, x1, 'purple')
 
     # Solve ODE prediction for scenario 2
-    q2=125 # keep q the same at zero
+    q2=150 # keep q the same at zero
     x2 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q2, dqdt, a, b, c, p0)[1]
     ax1.plot(t1, x2, 'green')
 
@@ -609,7 +609,7 @@ def plot_x_uncertainty():
 
     # Estimate the variability of parameter b
     # We are assuming that parameter b has the biggest source of error in the system (you could choose another parameter if you like)
-    var=1e-1
+    var=5e-2
 
     # using Normal function to generate 500 random samples from a Gaussian distribution
     samples = np.random.normal(b, var, 500)
