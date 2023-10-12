@@ -227,7 +227,7 @@ def x_pars(pars_guess):
 
 
 # This function solves your ODE using Improved Euler for a future prediction with new q
-def solve_ode_prediction(f, t0, t1, dt, pi, q, a, b, c, p0):
+def solve_ode_prediction(f, t0, t1, dt, pi, q, dqdt, a, b, c, p0):
     """ Solve the pressure prediction ODE model using the Improved Euler Method.
     Parameters:
     -----------
@@ -273,8 +273,8 @@ def solve_ode_prediction(f, t0, t1, dt, pi, q, a, b, c, p0):
 
     # using the improved euler method to solve the pressure ODE
     for i in range(n):
-        f0 = f(t[i], p[i], q, a, b, c, p0)
-        f1 = f(t[i] + dt, p[i] + dt * f0, q, a, b, c, p0)
+        f0 = f(t[i], p[i], q, dqdt, a, b, c, p0)
+        f1 = f(t[i] + dt, p[i] + dt * f0, q, dqdt, a, b, c, p0)
         p.append(p[i] + dt * (f0 / 2 + f1 / 2))
         t.append(t[i] + dt)
 
@@ -485,4 +485,179 @@ def plot_scaled_ode():
 
     plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     plt.savefig("Scaled Parameter Model Plot.png")
+    plt.show()
+
+
+def plot_x_forecast():
+    ''' Plot the ODE LPM model over the given data plot with different q-value scenario for predictions.
+    Use a curve fitting function to accurately define the optimum parameter values.
+    Parameters:
+    -----------
+    none
+    Returns:
+    --------
+    none
+    '''
+
+    # Read in time and dependent variable data 
+    [t, p_exact, dqdt] = [load_data()[0], load_data()[1], load_data()[3]]
+  
+    # GUESS PARAMETERS HERE
+    pars_guess = [A_GUESS,B_GUESS,C_GUESS]
+
+    # Optimise parameters for model fit
+    pars, pars_cov = x_pars(pars_guess)
+
+    # Store optimal values for later use
+    [a,b,c] = pars
+
+    # Solve ODE and plot model
+    p = x_curve_fitting(t, *pars)
+    f, ax1 = plt.subplots()
+    ax1.plot(t, p_exact, 'r.', label='data')
+    ax1.plot(t, p, 'black', label='Model')
+
+    # Remember the last time
+    t_end = t[-1]
+
+    # Create forecast time with 200 new time steps
+    t1 = []
+    for i in range(50):
+        t1.append(i+t_end)
+    
+    # Set initial and ambient values for forecast
+    pi = p[-1] # Initial value of x is final value of model fit
+    p0 = 0.02  # Ambient value of x
+
+    dqdt = 0 # UNSURE WHAT THIS SHOULD BE
+
+    # Solve ODE prediction for scenario 1
+    q1=250 # heat up again
+    x1 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q1, dqdt, a, b, c, p0)[1]
+    ax1.plot(t1, x1, 'purple', label='Prediction when q = 300')
+
+    # Solve ODE prediction for scenario 2
+    q2=125 # keep q the same at zero
+    x2 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q2, dqdt, a, b, c, p0)[1]
+    ax1.plot(t1, x2, 'green', label='Prediction when q = 0')
+
+    # Solve ODE prediction for scenario 3
+    q3=0 # extract at faster rate
+    x3 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q3, dqdt, a, b, c, p0)[1]
+    ax1.plot(t1, x3, 'blue', label='Prediction when q = -300')
+
+    # Axis information
+    ax1.set_title('Temp Forecast')
+    ax1.set_ylabel('Pressure (MPa)')
+    ax1.set_xlabel('Time (days)')
+    ax1.legend()
+    plt.show()
+
+
+# This function computes uncertainty in your model
+def plot_x_uncertainty():
+    """
+    This function plots the uncertainty of the ODE model.
+    """
+
+    # read in time and dependent variable data
+    [t, p_exact] = [load_data()[2], load_data()[3]]
+
+    # GUESS PARAMETERS HERE
+    pars_guess = [A_GUESS,B_GUESS,C_GUESS]
+
+    # Optimise parameters for model fit
+    pars, pars_cov = x_pars(pars_guess)
+
+    # Store optimal values for later use
+    [a,b,c] = pars
+
+    # Solve ODE and plot model
+    p = x_curve_fitting(t, *pars)
+    figa, ax1 = plt.subplots()    
+    ax1.plot(t, p_exact, 'r.', label='data')
+    ax1.plot(t, p, 'black', label='Model')
+
+    # Remember the last time
+    t_end = t[-1]
+
+    # Create forecast time with 400 new time steps
+    t1 = []
+    for i in range(100):
+        t1.append(i+t_end)
+
+    # Set initial and ambient values for forecast
+    pi = p[-1] # Initial value of x is final value of model fit
+    p0 = 0.02  # Ambient value of x
+
+    dqdt = 0 # AGAIN UNSURE
+
+    # Solve ODE prediction for scenario 1
+    q1=250 # heat up again
+    x1 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q1, dqdt, a, b, c, p0)[1]
+    ax1.plot(t1, x1, 'purple')
+
+    # Solve ODE prediction for scenario 2
+    q2=125 # keep q the same at zero
+    x2 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q2, dqdt, a, b, c, p0)[1]
+    ax1.plot(t1, x2, 'green')
+
+    # Solve ODE prediction for scenario 3
+    q3=0 # extract at faster rate
+    x3 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q3, dqdt, a, b, c, p0)[1]
+    ax1.plot(t1, x3, 'blue')
+
+    # Estimate the variability of parameter b
+    # We are assuming that parameter b has the biggest source of error in the system (you could choose another parameter if you like)
+    var=1e-1
+
+    # using Normal function to generate 500 random samples from a Gaussian distribution
+    samples = np.random.normal(b, var, 500)
+
+    # initialise list to count parameters for histograms 
+    b_list = []
+
+    # loop to plot the different predictions with uncertainty
+    for i in range(0,499): # 500 samples are 0 to 499
+        # frequency distribution for histograms for parameters
+        b_list.append(samples[i])
+
+        # Solve model fit with uncertainty
+        spars = [a, samples[i], c]
+        x = x_curve_fitting(t, *spars)
+        ax1.plot(t, x, 'black', alpha=0.1, lw=0.5)
+
+        # Solve ODE prediction for scenario 1 with uncertainty
+        q1=250 	# heat up again
+        x1 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q1, dqdt, a, samples[i], c, p0)[1]
+        ax1.plot(t1, x1, 'purple', alpha=0.1, lw=0.5)
+
+        # Solve ODE prediction for scenario 2 with uncertainty	
+        q2=125 # keep q the same at zero
+        x2 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q2, dqdt, a, samples[i], c, p0)[1]
+        ax1.plot(t1, x2, 'green', alpha=0.1, lw=0.5)
+
+        # Solve ODE prediction for scenario 3 with uncertainty
+        q3=0 # extract at faster rate
+        x3 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q3, dqdt, a, samples[i], c, p0)[1]
+        ax1.plot(t1, x3, 'blue', alpha=0.1, lw=0.5)
+
+    ax1.set_title('Pressure Uncertainty Forecast')
+    ax1.set_ylabel('Pressure (MPa)')
+    ax1.set_xlabel('Time (sec)')
+    ax1.legend()
+
+    # plotting the histograms
+    figb, (ax2) = plt.subplots(1, 1)
+    num_bins = 30
+    ax2.hist(b_list, num_bins)
+    ax2.set_title("Frequency Density plot for Parameter b", fontsize=9)
+    ax2.set_xlabel('Parameter b', fontsize=9)
+    ax2.set_ylabel('Frequency density', fontsize=9)
+    a_yf5, a_yf95 = np.percentile(b_list, [5, 95])
+    ax2.axvline(a_yf5, label='95% interval', color='r', linestyle='--')
+    ax2.axvline(a_yf95, color='r', linestyle='--')
+    ax2.legend(loc=0, fontsize=9)
+
+    plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     plt.show()
