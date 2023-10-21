@@ -609,7 +609,7 @@ def plot_x_uncertainty():
     ax1.plot(t1, x1, 'red')
 
     # Solve ODE prediction for scenario 2
-    q2=200.72853466 # keep q the same at zero
+    q2=210.72853466 # keep q the same at zero
     x2 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q2, dqdt, a, b, c, p0)[1]
     ax1.plot(t1, x2, 'red')
 
