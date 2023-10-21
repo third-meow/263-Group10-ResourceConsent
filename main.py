@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # plot_suitable()
 
     # ODE model with improved parameter values from curve_fit
-    plot_improve()
+    #plot_improve()
 
     # Plot showing that with q = 0, there is very little pressure variation
     # as expected
