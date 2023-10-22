@@ -560,8 +560,8 @@ def plot_x_forecast():
     ax1.set_title('Pressure Forecast')
     ax1.set_ylabel('Pressure (MPa)')
     ax1.set_xlabel('Time (days)')
-    #legend = ax1.legend(loc='upper left')
-    #plt.gca().add_artist(legend)
+    legend = ax1.legend(loc='upper left')
+    plt.gca().add_artist(legend)
     plt.show()
 
 
@@ -658,7 +658,7 @@ def plot_x_uncertainty():
         x3 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q3, dqdt, a, samples[i], c, p0)[1]
         ax1.plot(t1, x3, 'blue', alpha=0.1, lw=0.5)
 
-        # q4 = 0 # extract at faster rate
+        q4 = 0 # extract at faster rate
         x4 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q4, dqdt, a, samples[i], c, p0)[1]
         ax1.plot(t1, x4, 'pink', alpha=0.1, lw=0.5)
     plt.axhline(0.247, color='g', linestyle='--', label = 'M4.5')
