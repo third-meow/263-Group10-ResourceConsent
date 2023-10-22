@@ -544,7 +544,7 @@ def plot_x_forecast():
     # Solve ODE prediction for scenario 3
     q3=165 # extract at faster rate
     x3 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q3, dqdt, a, b, c, p0)[1]
-    ax1.plot(t1, x3, 'blue', label='Local Iwi q = 165')
+    ax1.plot(t1, x3, 'orange', label='Local Iwi q = 165')
 
     q4 = 0  # extract at faster rate
     x4 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q4, dqdt, a, b, c, p0)[1]
@@ -552,7 +552,7 @@ def plot_x_forecast():
 
     q5 = 120  # extract at faster rate
     x5 = solve_ode_prediction(ode_model, t1[0], t1[-1], t1[1] - t1[0], pi, q5, dqdt, a, b, c, p0)[1]
-    ax1.plot(t1, x5, 'orange', label='Prediction when q = 120')
+    ax1.plot(t1, x5, 'blue', label='Prediction when q = 120')
 
     # Axis information
     plt.axhline(0.247, color='g', linestyle='--', label = 'M4.5')
@@ -560,8 +560,10 @@ def plot_x_forecast():
     ax1.set_title('Pressure Forecast')
     ax1.set_ylabel('Pressure (MPa)')
     ax1.set_xlabel('Time (days)')
-    #legend = ax1.legend(loc='upper left')
-    #plt.gca().add_artist(legend)
+    pos = ax1.get_position()
+    ax1.set_position([pos.x0, pos.y0, pos.width, pos.height * 0.85])
+    legend = ax1.legend(loc='upper center', bbox_to_anchor=(0.5, 1.35), ncol=3,)
+    plt.gca().add_artist(legend)
     plt.show()
 
 
